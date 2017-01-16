@@ -38,4 +38,6 @@ $(function () {
 
     displayObject(o);
     displayObject("coucou");
+	displayObject(true);
+	displayObject({id:3});
 });

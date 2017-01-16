@@ -33,13 +33,13 @@
                 age: 43,
                 ville:"Valence",
                 couleur: "#eee"
-            }
+            },
             {
                 nom: "Pierre",
                 age: 3,
                 ville:"Stone",
                 couleur: "red"
-            }
+            },
             {
                 nom: "Walter",
                 age: 23,
@@ -51,6 +51,16 @@
 
 	<script>
         $(function(){
+            // créer une table
+            let table = $("<table><tr><th>NOM</th><th>AGE</th><th>VILLE</th><th>COULEUR</th></tr></table>");
+
+            // faire chaque ligne
+            applicationData.forEach( function(personne) {
+                table.append( $(`<tr><td>${personne.nom}</td><td>${personne.age}</td><td>${personne.ville}</td><td style="background-color: ${personne.couleur};">${personne.couleur}</td></tr>`) )
+            })
+
+            // insérer la table dans le body
+            $('body').append( table )
         });
     </script>
 </head>
