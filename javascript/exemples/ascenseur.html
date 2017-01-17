@@ -1,0 +1,105 @@
+<html>
+
+<head>
+    <style>
+        .presenceAscenseur {
+            background-color: grey;
+        }
+
+        .etage {
+            width: 5em;
+            height: 5em;
+        }
+    </style>
+
+<script type="text/javascript">
+
+    var NOMBRE_ETAGES = 15;
+
+    var ascenseur = {
+        position: 0,
+        destination: null,
+
+        timerId: 0
+    };
+
+    function appelAscenseur(destination) {
+        if (ascenseur.destination !== null) {
+            console.log("ASCENSEUR EN MOUVEMENT, IMPOSSIBLE DE L'APPELER !");
+            return;
+        }
+
+        ascenseur.destination = destination;
+
+        ascenseur.timerId = setInterval(function () {
+            // retirer la classe presenceAscenseur de l'étage précédent,
+            etages[ascenseur.position].divEtage.classList.remove("presenceAscenseur");
+
+            // trouver l'étage suivant
+            if (ascenseur.position < destination) {
+                ascenseur.position++;
+            }
+            else if (ascenseur.position > destination) {
+                ascenseur.position--;
+            }
+
+            console.log("ascenseur à l'étage " + ascenseur.position);
+
+            if (ascenseur.position == destination) {
+                console.log("arrivé!");
+                ascenseur.destination = null;
+                clearInterval(ascenseur.timerId);
+                ascenseur.timerId = 0;
+            }
+
+            // ajouter la classe presenceAscenseur dessus
+            etages[ascenseur.position].divEtage.classList.add("presenceAscenseur");
+        }, 500);
+    }
+
+    var etages = [];
+
+    window.addEventListener("load", function () {
+        initialiserEtages();
+
+        appelAscenseur(0);
+    });
+
+    function initialiserEtages() {
+        var divEtages = document.getElementById('ascenseur');
+
+        for (var i = 0; i < NOMBRE_ETAGES; i++) {
+            var etage = new Etage(i);
+            etages.push(etage);
+
+            divEtages.appendChild(etage.div);
+        }
+    }
+
+    function Etage(numero) {
+        var divEtage = document.createElement('div');
+        divEtage.classList.add("etage");
+
+        var boutonEtage = document.createElement('button');
+        boutonEtage.innerText = "APPEL";
+        boutonEtage.addEventListener("click", function () {
+            appelAscenseur(numero);
+        });
+
+        var div = document.createElement('div');
+        div.appendChild(divEtage);
+        div.appendChild(boutonEtage);
+
+        this.numero = numero;
+        this.div = div;
+        this.divEtage = divEtage;
+        this.boutonEtage = boutonEtage;
+    }
+</script>
+</head>
+
+<body>
+    <div id="ascenseur"></div>
+</body>
+
+</html>

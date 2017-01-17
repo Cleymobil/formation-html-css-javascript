@@ -1,0 +1,112 @@
+<html>
+
+<head>
+    <script type="text/javascript">
+
+        var NOMBRE_ETAGES = 15;
+
+        var ascenseur = {
+            position: 0,
+            destinations: [],
+
+            timerId: null
+        };
+
+        function appelAscenseur(destination) {
+            ascenseur.destinations.push(destination);
+
+            console.log("enregistré destination " + destination);
+
+            if (ascenseur.timerId === null) {
+                ascenseur.timerId = setInterval(function () {
+                    if (ascenseur.destinations.length == 0) {
+                        clearInterval(ascenseur.timerId);
+                        ascenseur.timerId = null;
+                    }
+                    else {
+                        var destination = ascenseur.destinations[0];
+
+                        // retirer la classe presenceAscenseur de l'étage précédent,
+                        etages[ascenseur.position].divEtage.classList.remove("presenceAscenseur");
+
+                        // trouver l'étage suivant
+                        if (ascenseur.position < destination) {
+                            ascenseur.position++;
+                        }
+                        else if (ascenseur.position > destination) {
+                            ascenseur.position--;
+                        }
+
+                        console.log("ascenseur à l'étage " + ascenseur.position);
+
+                        if (ascenseur.position == destination) {
+                            console.log("arrivé!");
+                            ascenseur.destinations.shift();
+                        }
+
+                        // ajouter la classe presenceAscenseur dessus
+                        etages[ascenseur.position].divEtage.classList.add("presenceAscenseur");
+                    }
+                }, 500);
+            }
+        }
+
+        var etages = [];
+
+        window.addEventListener("load", function () {
+            initialiserEtages();
+
+            appelAscenseur(0);
+        });
+
+        function initialiserEtages() {
+            var divEtages = document.getElementById('ascenseur');
+
+            for (var i = 0; i < NOMBRE_ETAGES; i++) {
+                var etage = creerEtage(i);
+                etages.push(etage);
+
+                divEtages.appendChild(etage.div);
+            }
+        }
+
+        function creerEtage(numero) {
+            var divEtage = document.createElement('div');
+            divEtage.classList.add("etage");
+
+            var boutonEtage = document.createElement('button');
+            boutonEtage.innerText = "APPEL";
+            boutonEtage.addEventListener("click", function () {
+                appelAscenseur(numero);
+            });
+
+            var div = document.createElement('div');
+            div.appendChild(divEtage);
+            div.appendChild(boutonEtage);
+
+            return {
+                numero: numero,
+                div: div,
+                divEtage: divEtage,
+                boutonEtage: boutonEtage
+            }
+        }
+    </script>
+
+<style>
+        .presenceAscenseur {
+            background-color: grey;
+        }
+
+        .etage {
+            width: 5em;
+            height: 5em;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="ascenseur"></div>
+</body>
+
+</html>
