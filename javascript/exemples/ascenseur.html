@@ -1,105 +1,147 @@
 <html>
 
 <head>
-    <style>
-        .presenceAscenseur {
-            background-color: grey;
+    <script type="text/javascript">
+        var NOMBRE_ETAGES = 50;
+        var CLASS_PRESENCE_ASCENSEUR = "presenceAscenseur";
+        var NOMBRE_MAX_MEMOIRE = 10;
+        var DELAI_PASSAGE_ETAGE = 500;
+
+        var ascenseur = {
+            position: 0,
+            destinations: []
         }
 
-        .etage {
-            width: 5em;
-            height: 5em;
-        }
-    </style>
+        var etages = [];
 
-<script type="text/javascript">
+        var timerId = null;
 
-    var NOMBRE_ETAGES = 15;
+        function positionnerAscenseur(etage) {
+            // retirer la class csss 'presenceAscenseur' à la position de l'asceseur
+            var divEtageCourant = etages[ascenseur.position];
+            divEtageCourant.classList.remove(CLASS_PRESENCE_ASCENSEUR);
 
-    var ascenseur = {
-        position: 0,
-        destination: null,
+            // mettre a jour la position
+            ascenseur.position = etage;
 
-        timerId: 0
-    };
-
-    function appelAscenseur(destination) {
-        if (ascenseur.destination !== null) {
-            console.log("ASCENSEUR EN MOUVEMENT, IMPOSSIBLE DE L'APPELER !");
-            return;
+            // ajouter 'presenceAscenseur' sur la div correspondant au nouvel étage
+            divEtageCourant = etages[etage];
+            divEtageCourant.classList.add(CLASS_PRESENCE_ASCENSEUR);
         }
 
-        ascenseur.destination = destination;
-
-        ascenseur.timerId = setInterval(function () {
-            // retirer la classe presenceAscenseur de l'étage précédent,
-            etages[ascenseur.position].divEtage.classList.remove("presenceAscenseur");
-
-            // trouver l'étage suivant
-            if (ascenseur.position < destination) {
-                ascenseur.position++;
-            }
-            else if (ascenseur.position > destination) {
-                ascenseur.position--;
+        function demanderAscenseur(etageDemande) {
+            if (ascenseur.destinations.length == 0 && ascenseur.position == etageDemande) {
+                console.warn('je suis là, rentre');
+                return;
             }
 
-            console.log("ascenseur à l'étage " + ascenseur.position);
-
-            if (ascenseur.position == destination) {
-                console.log("arrivé!");
-                ascenseur.destination = null;
-                clearInterval(ascenseur.timerId);
-                ascenseur.timerId = 0;
+            if (ascenseur.destinations.length >= NOMBRE_MAX_MEMOIRE) {
+                console.warn("désolé je....j'ai oublié");
+                return;
             }
 
-            // ajouter la classe presenceAscenseur dessus
-            etages[ascenseur.position].divEtage.classList.add("presenceAscenseur");
-        }, 500);
-    }
+            // mémoriser l'étage demandé
+            ascenseur.destinations.push(etageDemande);
 
-    var etages = [];
+            // toutes les 500ms, aller vers la destination
+            if (timerId != null)
+                return;
 
-    window.addEventListener("load", function () {
-        initialiserEtages();
+            timerId = setInterval(function () {
+                console.log(`destinations : ${ascenseur.destinations}`);
 
-        appelAscenseur(0);
-    });
+                // destination en cours
+                var destination = ascenseur.destinations[0];
 
-    function initialiserEtages() {
-        var divEtages = document.getElementById('ascenseur');
+                // trouver le nouvel étage ou se trouve l'ascenseur (monte ou descend?)
+                var nouvellePosition;
+                if (destination > ascenseur.position)
+                    nouvellePosition = ascenseur.position + 1;
+                else if (destination < ascenseur.position)
+                    nouvellePosition = ascenseur.position - 1;
+                else
+                    nouvellePosition = ascenseur.position;
 
-        for (var i = 0; i < NOMBRE_ETAGES; i++) {
-            var etage = new Etage(i);
-            etages.push(etage);
+                // appeler positionnerAscenseur(...) pour positionner l'ascenseur
+                positionnerAscenseur(nouvellePosition);
 
-            divEtages.appendChild(etage.div);
+                if (ascenseur.position == destination) {
+                    console.log('on est arrivé !');
+                    ascenseur.destinations.shift();
+                }
+
+                if (ascenseur.destinations.length == 0) {
+                    console.log('la liste des destinations est épuisée');
+                    clearInterval(timerId);
+                    timerId = null;
+                }
+            }, DELAI_PASSAGE_ETAGE);
         }
-    }
 
-    function Etage(numero) {
-        var divEtage = document.createElement('div');
-        divEtage.classList.add("etage");
+        function creerEtage(numero) {
+            var divEtage = document.createElement('div');
 
-        var boutonEtage = document.createElement('button');
-        boutonEtage.innerText = "APPEL";
-        boutonEtage.addEventListener("click", function () {
-            appelAscenseur(numero);
+            var buttonEtage = document.createElement('button');
+            buttonEtage.innerText = "Appel Etage " + numero;
+            buttonEtage.addEventListener('click', function () {
+                demanderAscenseur(numero);
+            });
+
+            var div = document.createElement('div');
+            div.appendChild(buttonEtage);
+            div.appendChild(divEtage);
+            div.classList.add('etage');
+
+            return div;
+        }
+
+        window.addEventListener('load', function () {
+            var immeuble = document.getElementById('immeuble');
+
+            for (var i = 0; i < NOMBRE_ETAGES; i++) {
+                var etage = creerEtage(i);
+
+                etages.push(etage);
+
+                immeuble.appendChild(etage);
+            }
+
+            positionnerAscenseur(0);
         });
+    </script>
 
-        var div = document.createElement('div');
-        div.appendChild(divEtage);
-        div.appendChild(boutonEtage);
-
-        this.numero = numero;
-        this.div = div;
-        this.divEtage = divEtage;
-        this.boutonEtage = boutonEtage;
+<style>
+    #immeuble {
+        display: flex;
+        flex-flow: column nowrap;
+        align-items: center;
     }
-</script>
+
+    .etage {
+        display: flex;
+        flex-flow: row;
+    }
+
+    .etage>div {
+        width:3em;
+        height:3em;
+
+        border: 1px solid grey;
+    }
+
+    .etage>button {
+        width: 10em;
+    }
+
+    .presenceAscenseur.etage>div {
+        transition: 500ms;
+        background-color: pink;
+    }
+    </style>
 </head>
 
 <body>
-    <div id="ascenseur"></div>
+    <div id="immeuble"></div>
 </body>
 
 </html>
