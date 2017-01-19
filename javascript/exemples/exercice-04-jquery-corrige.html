@@ -53,11 +53,14 @@ Ajouter du code utilisant JQuery pour :
 	<div id="notes"></div>
 
 	<script>
+		var ul = $('<ul>');
+		ul.appendTo($('#notes'));
+		
 		$("a.footnote").each(function(i) {
 			let footNoteId = "foot_" + i
 			$(this).attr("href", "#" + footNoteId )
-			$("#notes").append(
-				$('<p>').html( $(this).attr("data-note") ).attr("id", footNoteId)
+			ul.append(
+				$('<li>').html( $(this).attr("data-note") ).attr("id", footNoteId)
 			)
 		})
 	</script>
