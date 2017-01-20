@@ -1,0 +1,22 @@
+= Javascript et JQuery
+:author: Arnaud Tournier
+:email: ltearno@gmail.com
+:toc: macro
+:toc-title: Notes sur Javascript et JQuery
+:source-highlighter: highlightjs
+:imagesdir: images
+
+LTE Consulting (C) - 2016
+
+toc::[]
+
+== Javascript et JQuery
+
+=== Exercices
+
+- Input, Bouton et DIV, quand je clique tu loggues ce que j'ai écrit...
+- Menu déroulant
+- Notes de bas de page
+- Afficher des infos sur un objet => prototype, type, chaine d'héritage, ...
+- Todo liste, avec animations css3
+- Une calculatrice

@@ -1,6 +1,6 @@
 % HTML CSS Javascript
 %
-% Formation HTML CSS Javascript CS - 2015 - Arnaud Tournier - LTE Consulting
+% Formation HTML CSS Javascript CS - 2016 - Arnaud Tournier - LTE Consulting
 
 ## HTML
 
@@ -2327,6 +2327,36 @@ puis
 
 ### JSON
 
+Un sous-ensemble de JavaScript permettant de décrire des données.
+
+Exemple :
+
+		[
+			{ "id": 233, "nom": "Toto" },
+			{ "id": 1045, "nom": "Titi" }
+		]
+
+*Attention à new pas oublier les `"` dans le nom des propriétés !*
+
+### Utilisation JSON
+
+Quand on échange des données entre le navigateur et le serveur, il est courant d'utiliser le format **JSON**.
+
+Deux fonctions permettent de passer de la représentation JSON à un _object vivant_ :
+
+		var texte = '{ "id": 3, "category": "youp" }';
+		var data = JSON.parse( texte );
+
+		// data est un objet : { id: 3, category: "youp" }
+
+Et vice-versa :
+
+		var donnees = [2, { couleur: "bleu" }];
+		var texteAuFormatJSON = JSON.toString( donnees );
+
+		// texteAuFormatJSON est un string :
+		// '[2, { "couleur": "bleu" }]'
+
 ### AJAX
 
 `XMLHttpRequest` permet d'effectuer des requêtes vers le serveur, sans recharger la page.
@@ -2334,6 +2364,30 @@ puis
 En fonction des données reçues, le programme Javascript va modifier la structure du document.
 
 C'est le Web 2.0 !
+
+### Faire une requête AJAX
+
+		var requete = new XMLHttpRequest();
+		requete.open('GET', url);
+		requete.onreadystatechange = function () {
+		  if (requete.readyState == 4) { // 4 => réponse reçue
+		    if(requete.status == 200) // 200 => code de réponse HTTP
+		      alert(requete.responseText);
+		    else
+		      alert("Erreur pendant le chargement de la page.\n");
+		  }
+		};
+		req.send(null); // null => corps de la requête (données)
+
+Seules les requêtes vers le serveur qui a produit la page HTML sont autorisées par défaut.
+
+### Architecture REST
+
+Architecture logicielle qui consiste à utiliser le protocole **HTTP** pour **échanger des données** entre un serveur et un client.
+
+Dans le cadre de cette architecture, à chaque **URL** possible correspond une **ressource** que l'on peut **consulter, ajouter, supprimer et modifier**.
+
+Cette architecture est détaillée dans la formation Java EE.
 
 ### Web Components
 
