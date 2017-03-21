@@ -18,6 +18,30 @@ let dataService = {
             alias: 'Youyou',
             nbLikes: 5,
             nbDislikes: 3
+        },
+
+        {
+            id: 35,
+            name: 'Batman',
+            alias: 'Bibou',
+            nbLikes: 5,
+            nbDislikes: 3
+        },
+
+        {
+            id: 36,
+            name: 'Superman',
+            alias: 'Shanti',
+            nbLikes: 5,
+            nbDislikes: 3
+        },
+
+        {
+            id: 37,
+            name: 'Thor',
+            alias: 'Le roi du marteau',
+            nbLikes: 5,
+            nbDislikes: 3
         }
     ],
 
@@ -66,8 +90,6 @@ function chainPrototypes(childClassConstructor, baseClassConstructor) {
 
 /** Code de base pour les composants graphiques */
 
-// TODO On pourrait rajouter la gestion de l'envoi d'évènements custom sur le noeud racine du composant
-
 function GraphicComponent(template) {
     // création du noeud DOM en fonction de la template
     let wrapper = document.createElement('div');
@@ -78,11 +100,9 @@ function GraphicComponent(template) {
 
     // extraction automatique des noeuds identifiés dans la template
     this.elements = {};
-    this.el.querySelectorAll('[component-id]').forEach((element) => {
+    wrapper.querySelectorAll('[component-id]').forEach((element) => {
         this.elements[element.getAttribute('component-id')] = element;
     })
-
-    console.log(`created dom element ${this.el} from template : ${this.el.outerHTML}`);
 }
 
 GraphicComponent.prototype.rootElement = function () {
@@ -93,17 +113,45 @@ GraphicComponent.prototype.rootElement = function () {
 
 function HeroComponent() {
     GraphicComponent.call(this, `
-        <div>
-        <span component-id='name'></span> as <span component-id='alias'></span><br/>
-        <span component-id='nbLikes'></span> likes, <span component-id='nbDislikes'></span> dislikes<br/>
-        <button component-id='delete'>Delete</button>
-        <button component-id='select'>Select</button>
+        <div class='hero-component'>
+            <div component-id='display'>
+                <span class='hero-name' component-id='name'></span> aka <span component-id='alias'></span><br/>
+                <span component-id='nbLikes'></span> likes, <span component-id='nbDislikes'></span> dislikes<br/>
+                <button component-id='delete'>Delete</button>
+                <button component-id='select'>Edit</button>
+            </div>
+            <div component-id='form'>
+            </div>
         </div>`);
-        
+
     this.hero = null;
 
+    this.form = new HeroFormComponent();
+    this.elements.form.appendChild(this.form.rootElement());
+
     this.elements.delete.addEventListener('click', () => this.onDelete && this.onDelete());
-    this.elements.select.addEventListener('click', () => this.onSelect && this.onSelect());
+    this.elements.select.addEventListener('click', () => {
+        this.form.setHero(this.hero);
+        this.elements.display.style.display = 'none';
+        this.elements.form.style.display = null;
+
+        this.form.focus();
+    });
+
+    this.form.onCancel = () => {
+        this.elements.display.style.display = null;
+        this.elements.form.style.display = 'none';
+    };
+
+    this.form.onValidate = (data) => {
+        this.onSave && this.onSave(data);
+
+        this.elements.display.style.display = null;
+        this.elements.form.style.display = 'none';
+    };
+
+    this.elements.display.style.display = null;
+    this.elements.form.style.display = 'none';
 }
 
 chainPrototypes(HeroComponent, GraphicComponent);
@@ -113,17 +161,16 @@ HeroComponent.prototype.setHero = function (hero) {
 }
 
 HeroComponent.prototype.updateDisplay = function () {
-    for (let propertyName of ['name', 'alias', 'nbLikes', 'nbDislikes']) {
+    for (let propertyName of ['name', 'alias', 'nbLikes', 'nbDislikes'])
         this.elements[propertyName].innerText = this.hero[propertyName];
-    }
 }
 
 /** HeroesListComponent */
 
 function HeroesListComponent() {
     GraphicComponent.call(this, `
-        <div>
-            <div>Liste des héros</div>
+        <div class='hero-list-component'>
+            <h1>Liste des héros</h1>
             <div component-id='heroesList'></div>
             <button component-id='newHeroButton'>New hero</button>
             <div component-id='heroForm'></div>
@@ -132,114 +179,94 @@ function HeroesListComponent() {
     this.heroForm = new HeroFormComponent();
     this.elements.heroForm.appendChild(this.heroForm.rootElement());
 
-    this.heroes = [];
     this.displayedHeroes = {};
 
-    this.elements.newHeroButton.addEventListener('click', () => {
-        this.creationMode();
-    });
+    this.elements.newHeroButton.addEventListener('click', () => this.creationMode());
 
     this.resetMode();
 
-    this.heroForm.onValidate = (data) => { this.validateForm(data) }
-    this.heroForm.onCancel = () => { this.resetMode(); };
+    this.heroForm.onValidate = (data) => this.validateForm(data);
+    this.heroForm.onCancel = () => this.resetMode();
 }
 
 chainPrototypes(HeroesListComponent, GraphicComponent);
 
 HeroesListComponent.prototype.resetMode = function () {
-    this.editedHero = null;
     this.elements.heroForm.style.display = 'none';
     this.elements.newHeroButton.style.display = null;
 }
 
 HeroesListComponent.prototype.creationMode = function () {
-    this.editedHero = null;
-
     this.elements.heroForm.style.display = null;
     this.elements.newHeroButton.style.display = 'none';
 
     this.heroForm.setHero(null);
-}
-
-HeroesListComponent.prototype.editionMode = function (hero) {
-    this.editedHero = hero;
-
-    this.elements.heroForm.style.display = null;
-    this.elements.newHeroButton.style.display = 'none';
-
-    this.heroForm.setHero(hero);
+    this.heroForm.focus();
 }
 
 HeroesListComponent.prototype.validateForm = function (data) {
-    if (this.editedHero) {
-        let combined = Object.assign({}, this.editedHero);
-        Object.assign(combined, data);
-
-        dataService.putHero(combined).then(hero => {
-            this.displayedHeroes[hero.id].setHero(hero);
-            this.displayedHeroes[hero.id].updateDisplay();
-            this.resetMode();
-        });
-    }
-    else {
-        dataService.postHero(data).then(hero => {
-            this.addHeroToDisplay(hero);
-            this.resetMode();
-        });
-    }
-}
-
-HeroesListComponent.prototype.load = function () {
-    dataService.fetchAll().then(avengers => {
-        this.heroes = avengers;
-
-        this.updateDisplay();
+    dataService.postHero(data).then((hero) => {
+        this.addHeroToDisplay(hero);
+        this.resetMode();
     });
 }
 
-HeroesListComponent.prototype.updateDisplay = function () {
-    this.elements.heroesList.innerHTML = '';
-    this.displayedHeroes = {};
+HeroesListComponent.prototype.load = function () {
+    dataService.fetchAll().then(heroes => {
+        this.elements.heroesList.innerHTML = '';
+        this.displayedHeroes = {};
 
-    for (let hero of this.heroes)
-        this.addHeroToDisplay(hero);
+        for (let hero of heroes)
+            this.addHeroToDisplay(hero);
+    });
 }
 
 HeroesListComponent.prototype.addHeroToDisplay = function (hero) {
-    // construction d'un composant pour le héro
-    let heroComponent = new HeroComponent();
-    heroComponent.setHero(hero);
+    let heroComponent = this.displayedHeroes[hero.id];
+
+    if (!heroComponent) {
+        heroComponent = new HeroComponent();
+        heroComponent.setHero(hero);
+
+        this.displayedHeroes[hero.id] = heroComponent;
+
+        heroComponent.onDelete = () => {
+            dataService.deleteHero(hero.id).then((result) => {
+                if (result) {
+                    heroComponent.rootElement().remove();
+                    delete this.displayedHeroes[hero.id];
+                }
+            })
+        }
+
+        heroComponent.onSave = (data) => {
+            let combined = Object.assign({}, hero);
+            Object.assign(combined, data);
+
+            dataService.putHero(combined).then((hero) => {
+                this.addHeroToDisplay(hero);
+                this.resetMode();
+            });
+        };
+
+        this.elements.heroesList.appendChild(heroComponent.rootElement());
+    }
+
     heroComponent.updateDisplay();
-
-    this.displayedHeroes[hero.id] = heroComponent;
-
-    heroComponent.onDelete = () => {
-        dataService.deleteHero(hero.id).then((result) => {
-            if (result)
-                heroComponent.rootElement().remove();
-        })
-    }
-
-    heroComponent.onSelect = () => {
-        this.editionMode(hero);
-    }
-
-    this.elements.heroesList.appendChild(heroComponent.rootElement());
 }
 
 /** HeroFormComponent */
 
 function HeroFormComponent() {
     GraphicComponent.call(this, `
-        <form>
+        <form component-id='form'>
             <label>Name : <input component-id='name'/></label><br/>
             <label>Alias : <input component-id='alias'/></label><br/>
             <button component-id='validate'>Validate</button>
             <button type='button' component-id='cancel'>Cancel</button>
         </form>`);
 
-    this.el.addEventListener('submit', (event) => {
+    this.elements.form.addEventListener('submit', (event) => {
         event.preventDefault();
         event.stopPropagation();
 
@@ -257,6 +284,10 @@ chainPrototypes(HeroFormComponent, GraphicComponent);
 HeroFormComponent.prototype.setHero = function (hero) {
     this.elements.name.value = hero ? hero.name : '';
     this.elements.alias.value = hero ? hero.alias : '';
+}
+
+HeroFormComponent.prototype.focus = function () {
+    this.elements.name.focus();
 }
 
 /** Application initialisation */
