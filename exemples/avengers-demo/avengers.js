@@ -99,6 +99,7 @@ function HeroComponent() {
         <button component-id='delete'>Delete</button>
         <button component-id='select'>Select</button>
         </div>`);
+        
     this.hero = null;
 
     this.elements.delete.addEventListener('click', () => this.onDelete && this.onDelete());
