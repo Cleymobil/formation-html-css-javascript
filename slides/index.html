@@ -1298,7 +1298,11 @@ Je suis une remarque !
 </section><section id="float" class="slide level3">
 <h3>Float</h3>
 <p>Permet de créer un &quot;habillage&quot;.</p>
-<p>La propriété <code>float</code> force un élément à être retiré du flux et placé à gauche ou à droite de son bloc conteneur. Au sein de ce conteneur, le texte et les éléments <code>inline</code> se répartiront autour.</p>
+<ul>
+<li>L'élément est d'abord placé normalement dans le flux. Donc si un autre élément bloc est placé avant lui, l'élément flottant se positionnera en dessous; et si un élément bloc le suit, ce dernier sera placé dessous.</li>
+<li>L'élément <code>float</code> est <em>poussé</em> à gauche ou à droite de son conteneur.</li>
+<li>Les éléments qui le suivent au sein du conteneur se placent autour de lui.</li>
+</ul>
 </section><section id="clear" class="slide level3">
 <h3>Clear</h3>
 <p>On utilise la propriété <code>clear</code> (<code>left</code>, <code>right</code>, <code>both</code>) pour annuler l'effet d'un <code>float</code>.</p>

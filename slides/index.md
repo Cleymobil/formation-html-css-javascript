@@ -1607,7 +1607,9 @@ Définit le comportement à adopter dans le cas où un contenu est plus grand qu
 
 Permet de créer un "habillage".
 
-La propriété `float` force un élément à être retiré du flux et placé à gauche ou à droite de son bloc conteneur. Au sein de ce conteneur, le texte et les éléments `inline` se répartiront autour.
+- L'élément est d'abord placé normalement dans le flux. Donc si un autre élément bloc est placé avant lui, l'élément flottant se positionnera en dessous; et si un élément bloc le suit, ce dernier sera placé dessous.
+- L'élément `float` est _poussé_ à gauche ou à droite de son conteneur.
+- Les éléments qui le suivent au sein du conteneur se placent autour de lui.
 
 ### Clear
 
