@@ -1,8 +1,25 @@
+import rawData from './db-raw';
+
+/*
+public 2c4c69c4f2c2fd59cdbe9dc9429d254e
+private 952fb13aeeb2ea14103811d46d3f48461c161918
+*/
+
+// https://gateway.marvel.com:443/v1/public/characters?limit=1000&apikey=2c4c69c4f2c2fd59cdbe9dc9429d254e&ts=1&hash=e90e51a3678e8564a6715b97ec7236b2
+
 /** Service de données */
 let dataService = {
     nextId: 333,
 
-    database: [
+    database: rawData.data.results.map((entry) => ({
+        id: entry.id,
+        name: entry.name,
+        alias: entry.description,
+        nbLikes: 0,
+        nbDislikes: 0
+    })),
+
+    databaseOld: [
         {
             id: 33,
             name: 'Zorro',
