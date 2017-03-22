@@ -10,6 +10,7 @@ function HeroesListComponent() {
     GraphicComponent.call(this, `
         <div class='hero-list-component'>
             <h1>Liste des héros</h1>
+            <div>Recherche: <input component-id='search'/></div>
             <div component-id='heroesList'></div>
             <button component-id='newHeroButton'>New hero</button>
             <div component-id='heroForm'></div>
@@ -26,6 +27,25 @@ function HeroesListComponent() {
 
     this.heroForm.onValidate = (data) => this.validateForm(data);
     this.heroForm.onCancel = () => this.resetCreationForm();
+
+    this.elements.search.addEventListener('input', (event) => {
+        let search = this.elements.search.value;
+
+        if (search != '') {
+            search = search.toLowerCase();
+
+            for (let id in this.displayedHeroes) {
+                if (this.displayedHeroes[id].hero.name.toLowerCase().indexOf(search) >= 0)
+                    this.displayedHeroes[id].rootElement().style.display = null;
+                else
+                    this.displayedHeroes[id].rootElement().style.display = "none";
+            }
+        }
+        else {
+            for (let id in this.displayedHeroes)
+                this.displayedHeroes[id].rootElement().style.display = null;
+        }
+    });
 }
 
 chainPrototypes(HeroesListComponent, GraphicComponent);
