@@ -1,20 +1,25 @@
-import dataService from './data-service';
 import chainPrototypes from './chainPrototypes';
 import GraphicComponent from './graphic-component';
 import HeroFormComponent from './hero-form-component';
 import HeroComponent from './hero-component';
+import GameComponent from './game-component';
 
 /** HeroesListComponent */
 
-function HeroesListComponent() {
+function HeroesListComponent(dataService) {
     GraphicComponent.call(this, `
         <div class='hero-list-component'>
             <h1>Liste des héros</h1>
             <div>Recherche: <input component-id='search'/></div>
+            <div component-id='easter'></div>
             <div component-id='heroesList'></div>
             <button component-id='newHeroButton'>New hero</button>
             <div component-id='heroForm'></div>
         </div>`);
+
+    this.dataService = dataService;
+
+    this.game = null;
 
     this.heroForm = new HeroFormComponent();
     this.elements.heroForm.appendChild(this.heroForm.rootElement());
@@ -32,6 +37,20 @@ function HeroesListComponent() {
         let search = this.elements.search.value;
 
         if (search != '') {
+            if (search == 'MAGIC') {
+                if (!this.game) {
+                    this.game = new GameComponent();
+                    this.elements.easter.appendChild(this.game.rootElement());
+                }
+            }
+            else {
+                if (this.game) {
+                    this.game.stop();
+                    this.game.rootElement().remove();
+                    this.game = null;
+                }
+            }
+
             search = search.toLowerCase();
 
             for (let id in this.displayedHeroes) {
@@ -64,14 +83,14 @@ HeroesListComponent.prototype.creationMode = function () {
 }
 
 HeroesListComponent.prototype.validateForm = function (data) {
-    dataService.postHero(data).then((hero) => {
+    this.dataService.postHero(data).then((hero) => {
         this.addHeroToDisplay(hero);
         this.resetCreationForm();
     });
 }
 
 HeroesListComponent.prototype.load = function () {
-    dataService.fetchAll().then(heroes => {
+    this.dataService.fetchAll().then(heroes => {
         this.elements.heroesList.innerHTML = '';
         this.displayedHeroes = {};
 
@@ -100,14 +119,14 @@ HeroesListComponent.prototype.updateHero = function (hero, data) {
     let combined = Object.assign({}, hero);
     Object.assign(combined, data);
 
-    dataService.putHero(combined)
+    this.dataService.putHero(combined)
         .then((hero) => {
             this.addHeroToDisplay(hero);
         });
 }
 
 HeroesListComponent.prototype.deleteHero = function (hero) {
-    dataService.deleteHero(hero.id)
+    this.dataService.deleteHero(hero.id)
         .then((result) => {
             if (result) {
                 this.displayedHeroes[hero.id].rootElement().remove();
